@@ -9,16 +9,13 @@
 <main>
   <div th:if="${book != null}">
     <div class="row g-5">
-      <!-- Cột ảnh bìa -->
       <div class="col-md-4">
         <img th:src="@{/uploads/{fileName}(fileName=${book.coverImageUrl})}"
              class="img-fluid rounded shadow-lg"
              th:alt="${book.title}"
              onerror="this.onerror=null;this.src='https://placehold.co/400x600/EFEFEF/AAAAAA?text=No+Image';">
       </div>
-      <!-- Cột thông tin sách -->
       <div class="col-md-8">
-        <!-- Thông báo thành công/lỗi -->
         <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
@@ -31,9 +28,8 @@
           Book description goes here.
         </p>
         <div class="d-flex align-items-center mt-4">
-          <span class="fs-2 fw-bold text-danger me-4" th:text="${#numbers.formatCurrency(book.price)}">Price</span>
+          <span class="fs-2 fw-bold text-danger me-4" th:text="${#numbers.formatInteger(book.price, 1, 'POINT')} + ' ₫'">Price</span>
 
-          <!-- Logic hiển thị nút Mua/Đọc sách -->
           <div th:if="${userOwnsBook or isAuthor}">
             <a th:href="@{/books/read/{id}(id=${book.id})}" class="btn btn-success btn-lg">
               <i class="bi bi-book-fill me-2"></i>Đọc sách
@@ -49,7 +45,6 @@
     </div>
   </div>
 
-  <!-- Trường hợp không tìm thấy sách -->
   <div th:if="${book == null}" class="text-center p-5">
     <h1 class="display-4">404 - Không tìm thấy sách</h1>
     <p class="lead">Cuốn sách bạn đang tìm kiếm không tồn tại.</p>

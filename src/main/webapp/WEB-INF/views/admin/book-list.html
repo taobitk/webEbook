@@ -156,7 +156,7 @@
               <th>ID</th>
               <th>Tên sách</th>
               <th>Tác giả</th>
-              <th>Giá (VND)</th>
+              <th>Giá</th>
               <th>Ngày đăng</th>
               <th class="text-end">Hành động</th>
             </tr>
@@ -168,7 +168,7 @@
                 <a th:href="@{/books/{id}(id=${book.id})}" class="text-light text-decoration-none fw-bold" th:text="${book.title}">Tên sách</a>
               </td>
               <td th:text="${book.author?.username}">Tác giả</td>
-              <td th:text="${#numbers.formatCurrency(book.price)}">Giá bán</td>
+              <td th:text="${#numbers.formatInteger(book.price, 0, 'POINT')} + ' ₫'">Giá bán</td>
               <td th:text="${book.uploadDate != null ? #dates.format(book.uploadDate, 'dd-MM-yyyy') : 'N/A'}">Ngày đăng</td>
               <td class="text-end">
                 <a th:href="@{/books/delete/{id}(id=${book.id})}" class="btn btn-sm btn-outline-danger"
