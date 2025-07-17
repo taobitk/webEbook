@@ -1,41 +1,105 @@
-<!-- File: /src/main/webapp/WEB-INF/views/read-book.html -->
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/_layout :: layout(~{::title}, ~{::main})}">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="'Đọc sách: ' + ${book != null ? book.title : 'Lỗi'}"></title>
-</head>
-<body>
 
-<main>
-    <!-- Container chính với nền tối và chữ sáng -->
-    <div id="pdf-container" class="card bg-dark text-light border-secondary">
-        <div class="card-body">
-            <!-- Hiển thị nội dung chỉ khi tìm thấy sách -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        .card {
+            background-color: #1e1e1e;
+            /* Trên mobile, bỏ border của card để giao diện thoáng hơn */
+            border: 0;
+        }
+        @media (min-width: 768px) {
+            .card {
+                border: 1px solid #333; /* Hiện lại border trên màn hình lớn */
+            }
+        }
+        .card-title, .card-text, h1, h2, h3, h4, h5, p {
+            color: #ffffff;
+        }
+        .text-muted {
+            color: #adb5bd !important;
+        }
+        .side-nav-btn {
+            padding: 0 1rem !important;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .side-nav-btn:not(:disabled):hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-dark">
+
+<main class="container-fluid p-0 p-md-3">
+    <div id="pdf-container">
+        <div class="card card-body bg-dark text-light">
             <div th:if="${book != null}">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-arrow-left"></i> Quay lại chi tiết
+                        <i class="bi bi-arrow-left"></i>
+                        <span class="d-none d-sm-inline">Quay lại</span>
                     </a>
-                    <h1 class="h4 mb-0 text-center flex-grow-1" th:text="${book.title}">Tên sách</h1>
+                    <h1 class="h5 mb-0 text-center flex-grow-1 mx-2" th:text="${book.title}">Tên sách</h1>
                 </div>
                 <hr class="border-secondary">
-                <div class="nav d-flex justify-content-center align-items-center gap-3 my-3">
-                    <button id="prev" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Trang trước</button>
-                    <span id="page-num-display" class="page-info fw-bold">Trang: <span id="page_num">_</span> / <span id="page_count">_</span></span>
-                    <button id="next" class="btn btn-primary">Trang sau <i class="bi bi-arrow-right-circle"></i></button>
+
+                <div class="nav d-flex justify-content-center align-items-center gap-2 gap-sm-3 my-3">
+                    <button class="btn btn-secondary prev-btn">
+                        <i class="bi bi-arrow-left-circle"></i>
+                        <span class="d-none d-sm-inline">Trang trước</span>
+                    </button>
+                    <span class="page-info fw-bold">Trang: <span id="page_num">_</span> / <span id="page_count">_</span></span>
+                    <button class="btn btn-primary next-btn">
+                        <span class="d-none d-sm-inline">Trang sau</span>
+                        <i class="bi bi-arrow-right-circle"></i>
+                    </button>
                 </div>
-                <div class="text-center bg-secondary-subtle rounded p-2">
-                    <canvas id="pdf-viewer" class="shadow-sm"></canvas>
+
+                <div class="d-flex align-items-stretch justify-content-center gap-3 my-3">
+                    <button class="btn btn-outline-light d-none d-md-block prev-btn side-nav-btn d-flex align-items-center justify-content-center">
+                        <i class="bi bi-arrow-left-circle-fill fs-2"></i>
+                    </button>
+
+                    <div class="text-center bg-secondary-subtle rounded p-1 p-sm-2 flex-grow-1" style="max-width: 900px;">
+                        <canvas id="pdf-viewer" class="shadow-sm w-100 h-auto"></canvas>
+                    </div>
+
+                    <button class="btn btn-outline-light d-none d-md-block next-btn side-nav-btn d-flex align-items-center justify-content-center">
+                        <i class="bi bi-arrow-right-circle-fill fs-2"></i>
+                    </button>
+                </div>
+
+                <div class="nav d-flex justify-content-center align-items-center gap-2 gap-sm-3 my-3">
+                    <button class="btn btn-secondary prev-btn">
+                        <i class="bi bi-arrow-left-circle"></i>
+                        <span class="d-none d-sm-inline">Trang trước</span>
+                    </button>
+                    <span class="page-info fw-bold">Trang: <span id="page_num_bottom">_</span> / <span id="page_count_bottom">_</span></span>
+                    <button class="btn btn-primary next-btn">
+                        <span class="d-none d-sm-inline">Trang sau</span>
+                        <i class="bi bi-arrow-right-circle"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- Hiển thị nếu có lỗi từ Controller -->
             <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
         </div>
     </div>
 
-    <!-- SCRIPT ĐÃ ĐƯỢC VIẾT LẠI HOÀN TOÀN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
@@ -43,82 +107,80 @@
     <script th:inline="javascript">
         /*<![CDATA[*/
 
-        // Lấy các biến từ model của Thymeleaf
         const pdfFileName = /*[[${pdfUrl}]]*/ null;
         const serverErrorMessage = /*[[${errorMessage}]]*/ null;
 
-        // Chỉ thực thi nếu không có lỗi từ server và có file PDF để hiển thị
-        if (!serverErrorMessage) {
-            const url = pdfFileName ? `/uploads/${pdfFileName}` : null;
+        if (!serverErrorMessage && pdfFileName) {
+            const url = `/uploads/${pdfFileName}`;
+            let pdfDoc = null, pageNum = 1, pageRendering = false, pageNumPending = null;
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            const initialScale = 1.5;
+            const scale = initialScale * devicePixelRatio;
+            const canvas = document.getElementById('pdf-viewer'), ctx = canvas.getContext('2d');
+            const prevButtons = document.querySelectorAll('.prev-btn');
+            const nextButtons = document.querySelectorAll('.next-btn');
 
-            if (url) {
-                // Các biến và phần tử DOM
-                let pdfDoc = null,
-                    pageNum = 1,
-                    pageRendering = false,
-                    pageNumPending = null;
-
-                const devicePixelRatio = window.devicePixelRatio || 1;
-                const initialScale = 1.5;
-                const scale = initialScale * devicePixelRatio;
-
-                const canvas = document.getElementById('pdf-viewer'),
-                    ctx = canvas.getContext('2d'),
-                    prevButton = document.getElementById('prev'),
-                    nextButton = document.getElementById('next');
-
-                // Hàm render trang
-                function renderPage(num) {
-                    pageRendering = true;
-                    document.getElementById('page_num').textContent = num;
-                    prevButton.disabled = true;
-                    nextButton.disabled = true;
-
-                    pdfDoc.getPage(num).then(function(page) {
-                        const viewport = page.getViewport({ scale: scale });
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-                        canvas.style.width = `${viewport.width / devicePixelRatio}px`;
-                        canvas.style.height = `${viewport.height / devicePixelRatio}px`;
-
-                        const renderContext = { canvasContext: ctx, viewport: viewport };
-                        page.render(renderContext).promise.then(function() {
-                            pageRendering = false;
-                            prevButton.disabled = (pageNum <= 1);
-                            nextButton.disabled = (pageNum >= pdfDoc.numPages);
-                            if (pageNumPending !== null) {
-                                renderPage(pageNumPending);
-                                pageNumPending = null;
-                            }
-                        });
+            function renderPage(num) {
+                pageRendering = true;
+                document.getElementById('page_num').textContent = num;
+                document.getElementById('page_num_bottom').textContent = num;
+                prevButtons.forEach(btn => btn.disabled = true);
+                nextButtons.forEach(btn => btn.disabled = true);
+                pdfDoc.getPage(num).then(function(page) {
+                    const viewport = page.getViewport({ scale: scale });
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    const renderContext = { canvasContext: ctx, viewport: viewport };
+                    page.render(renderContext).promise.then(function() {
+                        pageRendering = false;
+                        prevButtons.forEach(btn => btn.disabled = (pageNum <= 1));
+                        nextButtons.forEach(btn => btn.disabled = (pageNum >= pdfDoc.numPages));
+                        if (pageNumPending !== null) {
+                            renderPage(pageNumPending);
+                            pageNumPending = null;
+                        }
                     });
-                }
-
-                function queueRenderPage(num) { if (pageRendering) { pageNumPending = num; } else { renderPage(num); } }
-                prevButton.addEventListener('click', () => { if (pageNum <= 1) return; pageNum--; queueRenderPage(pageNum); });
-                nextButton.addEventListener('click', () => { if (pageNum >= pdfDoc.numPages) return; pageNum++; queueRenderPage(pageNum); });
-
-                // Bắt đầu tải và hiển thị PDF
-                pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
-                    pdfDoc = pdfDoc_;
-                    document.getElementById('page_count').textContent = pdfDoc.numPages;
-                    renderPage(pageNum);
-                }).catch(function(error) {
-                    console.error('Lỗi khi tải file PDF:', error);
-                    document.getElementById('pdf-container').innerHTML = `<div class="alert alert-danger">Lỗi! Không thể tải hoặc xử lý file PDF.</div>`;
                 });
+            }
 
-            } else {
-                // Trường hợp sách tồn tại nhưng không có file PDF
-                const pdfContainer = document.getElementById('pdf-container');
-                if (pdfContainer) {
-                    pdfContainer.innerHTML = `<div class="alert alert-warning">Không tìm thấy đường dẫn file PDF của sách này.</div>`;
+            function queueRenderPage(num) { if (pageRendering) { pageNumPending = num; } else { renderPage(num); } }
+            function onPrevPage() { if (pageRendering || pageNum <= 1) return; pageNum--; queueRenderPage(pageNum); }
+            function onNextPage() { if (pageRendering || pageNum >= pdfDoc.numPages) return; pageNum++; queueRenderPage(pageNum); }
+
+            prevButtons.forEach(button => button.addEventListener('click', onPrevPage));
+            nextButtons.forEach(button => button.addEventListener('click', onNextPage));
+
+            document.addEventListener('keydown', function(event) {
+                if (pageRendering) return;
+
+                if (event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    onPrevPage();
+                } else if (event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    onNextPage();
                 }
+            });
+
+            pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+                pdfDoc = pdfDoc_;
+                document.getElementById('page_count').textContent = pdfDoc.numPages;
+                document.getElementById('page_count_bottom').textContent = pdfDoc.numPages;
+                renderPage(pageNum);
+            }).catch(function(error) {
+                console.error('Lỗi khi tải file PDF:', error);
+                document.getElementById('pdf-container').innerHTML = `<div class="alert alert-danger">Lỗi! Không thể tải hoặc xử lý file PDF.</div>`;
+            });
+        } else if (!serverErrorMessage) {
+            const pdfContainer = document.getElementById('pdf-container');
+            if (pdfContainer) {
+                pdfContainer.innerHTML = `<div class="alert alert-warning">Không tìm thấy đường dẫn file PDF của sách này.</div>`;
             }
         }
         /*]]>*/
     </script>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

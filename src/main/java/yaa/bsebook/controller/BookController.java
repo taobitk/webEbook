@@ -154,13 +154,20 @@ public class BookController {
 
     @GetMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN') or @bookService.isAuthor(principal.id, #id)")
-    public String deleteBook(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String deleteBook(@PathVariable Integer id, RedirectAttributes redirectAttributes, Authentication authentication) {
         try {
             bookService.deleteById(id);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa sách thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi xóa sách.");
         }
+
+        // Kiểm tra nếu người dùng có vai trò là ADMIN
+        if (authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
+            return "redirect:/admin/books";
+        }
+
         return "redirect:/dashboard/my-books";
     }
 }

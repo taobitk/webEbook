@@ -22,7 +22,6 @@ public class AdminController {
     @Autowired
     private IBookService bookService;
 
-    // ... các phương thức dashboard, user management giữ nguyên ...
     @GetMapping("/dashboard")
     public ModelAndView showAdminDashboard() {
         ModelAndView modelAndView = new ModelAndView("admin/dashboard");
@@ -59,29 +58,10 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
-
-    /**
-     * Hiển thị trang quản lý tất cả các sách cho Admin.
-     */
     @GetMapping("/books")
     public ModelAndView showBookManagement() {
         ModelAndView modelAndView = new ModelAndView("admin/book-list");
         List<Book> allBooks = bookService.findAll();
-
-        // --- THÊM LOG ĐỂ KIỂM TRA ---
-        System.out.println("=========================================");
-        System.out.println("Đã tìm thấy tổng cộng: " + allBooks.size() + " cuốn sách.");
-        // In ra tên sách đầu tiên nếu có để kiểm tra
-        if (!allBooks.isEmpty()) {
-            System.out.println("Tên sách đầu tiên: " + allBooks.get(0).getTitle());
-            if (allBooks.get(0).getAuthor() != null) {
-                System.out.println("Tác giả sách đầu tiên: " + allBooks.get(0).getAuthor().getUsername());
-            } else {
-                System.out.println("LỖI: Sách đầu tiên không có thông tin tác giả (author is null).");
-            }
-        }
-        System.out.println("=========================================");
-
         modelAndView.addObject("books", allBooks);
         return modelAndView;
     }
