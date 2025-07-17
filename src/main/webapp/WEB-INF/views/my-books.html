@@ -1,0 +1,59 @@
+<!-- File: /src/main/webapp/WEB-INF/views/my-books.html -->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/_layout :: layout(~{::title}, ~{::main})}">
+<head>
+  <title>Sách của tôi</title>
+</head>
+<body>
+
+<main>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Quản lý sách của tôi</h1>
+    <a th:href="@{/books/upload}" class="btn btn-primary">
+      <i class="bi bi-plus-circle-fill me-2"></i>Đăng sách mới
+    </a>
+  </div>
+
+  <div class="card bg-dark border-secondary">
+    <div class="card-body">
+      <div th:if="${myBooks.isEmpty()}" class="text-center p-5">
+        <p class="lead text-muted">Bạn chưa đăng tải cuốn sách nào. Hãy bắt đầu ngay!</p>
+      </div>
+
+      <div class="table-responsive" th:unless="${myBooks.isEmpty()}">
+        <table class="table table-dark table-hover align-middle">
+          <thead>
+          <tr>
+            <th scope="col">Tên sách</th>
+            <th scope="col">Giá (VND)</th>
+            <th scope="col">Ngày đăng</th>
+            <th scope="col" class="text-end">Hành động</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="book : ${myBooks}">
+            <td>
+              <a th:href="@{/books/{id}(id=${book.id})}" class="text-light text-decoration-none fw-bold" th:text="${book.title}">Tên sách</a>
+            </td>
+            <td th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT')}">Giá bán</td>
+            <td th:text="${#dates.format(book.uploadDate, 'dd-MM-yyyy')}">Ngày đăng</td>
+            <td class="text-end">
+              <a th:href="@{/books/edit/{id}(id=${book.id})}" class="btn btn-sm btn-outline-warning">
+                <i class="bi bi-pencil-square"></i> Sửa
+              </a>
+              <a th:href="@{/books/delete/{id}(id=${book.id})}" class="btn btn-sm btn-outline-danger"
+                 onclick="return confirm('Bạn có chắc chắn muốn xóa cuốn sách này không?');">
+                <i class="bi bi-trash3-fill"></i> Xóa
+              </a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

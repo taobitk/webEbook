@@ -1,0 +1,124 @@
+<!-- File: /src/main/webapp/WEB-INF/views/read-book.html -->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/_layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="'Đọc sách: ' + ${book != null ? book.title : 'Lỗi'}"></title>
+</head>
+<body>
+
+<main>
+    <!-- Container chính với nền tối và chữ sáng -->
+    <div id="pdf-container" class="card bg-dark text-light border-secondary">
+        <div class="card-body">
+            <!-- Hiển thị nội dung chỉ khi tìm thấy sách -->
+            <div th:if="${book != null}">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Quay lại chi tiết
+                    </a>
+                    <h1 class="h4 mb-0 text-center flex-grow-1" th:text="${book.title}">Tên sách</h1>
+                </div>
+                <hr class="border-secondary">
+                <div class="nav d-flex justify-content-center align-items-center gap-3 my-3">
+                    <button id="prev" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Trang trước</button>
+                    <span id="page-num-display" class="page-info fw-bold">Trang: <span id="page_num">_</span> / <span id="page_count">_</span></span>
+                    <button id="next" class="btn btn-primary">Trang sau <i class="bi bi-arrow-right-circle"></i></button>
+                </div>
+                <div class="text-center bg-secondary-subtle rounded p-2">
+                    <canvas id="pdf-viewer" class="shadow-sm"></canvas>
+                </div>
+            </div>
+
+            <!-- Hiển thị nếu có lỗi từ Controller -->
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        </div>
+    </div>
+
+    <!-- SCRIPT ĐÃ ĐƯỢC VIẾT LẠI HOÀN TOÀN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+    </script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+
+        // Lấy các biến từ model của Thymeleaf
+        const pdfFileName = /*[[${pdfUrl}]]*/ null;
+        const serverErrorMessage = /*[[${errorMessage}]]*/ null;
+
+        // Chỉ thực thi nếu không có lỗi từ server và có file PDF để hiển thị
+        if (!serverErrorMessage) {
+            const url = pdfFileName ? `/uploads/${pdfFileName}` : null;
+
+            if (url) {
+                // Các biến và phần tử DOM
+                let pdfDoc = null,
+                    pageNum = 1,
+                    pageRendering = false,
+                    pageNumPending = null;
+
+                const devicePixelRatio = window.devicePixelRatio || 1;
+                const initialScale = 1.5;
+                const scale = initialScale * devicePixelRatio;
+
+                const canvas = document.getElementById('pdf-viewer'),
+                    ctx = canvas.getContext('2d'),
+                    prevButton = document.getElementById('prev'),
+                    nextButton = document.getElementById('next');
+
+                // Hàm render trang
+                function renderPage(num) {
+                    pageRendering = true;
+                    document.getElementById('page_num').textContent = num;
+                    prevButton.disabled = true;
+                    nextButton.disabled = true;
+
+                    pdfDoc.getPage(num).then(function(page) {
+                        const viewport = page.getViewport({ scale: scale });
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        canvas.style.width = `${viewport.width / devicePixelRatio}px`;
+                        canvas.style.height = `${viewport.height / devicePixelRatio}px`;
+
+                        const renderContext = { canvasContext: ctx, viewport: viewport };
+                        page.render(renderContext).promise.then(function() {
+                            pageRendering = false;
+                            prevButton.disabled = (pageNum <= 1);
+                            nextButton.disabled = (pageNum >= pdfDoc.numPages);
+                            if (pageNumPending !== null) {
+                                renderPage(pageNumPending);
+                                pageNumPending = null;
+                            }
+                        });
+                    });
+                }
+
+                function queueRenderPage(num) { if (pageRendering) { pageNumPending = num; } else { renderPage(num); } }
+                prevButton.addEventListener('click', () => { if (pageNum <= 1) return; pageNum--; queueRenderPage(pageNum); });
+                nextButton.addEventListener('click', () => { if (pageNum >= pdfDoc.numPages) return; pageNum++; queueRenderPage(pageNum); });
+
+                // Bắt đầu tải và hiển thị PDF
+                pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+                    pdfDoc = pdfDoc_;
+                    document.getElementById('page_count').textContent = pdfDoc.numPages;
+                    renderPage(pageNum);
+                }).catch(function(error) {
+                    console.error('Lỗi khi tải file PDF:', error);
+                    document.getElementById('pdf-container').innerHTML = `<div class="alert alert-danger">Lỗi! Không thể tải hoặc xử lý file PDF.</div>`;
+                });
+
+            } else {
+                // Trường hợp sách tồn tại nhưng không có file PDF
+                const pdfContainer = document.getElementById('pdf-container');
+                if (pdfContainer) {
+                    pdfContainer.innerHTML = `<div class="alert alert-warning">Không tìm thấy đường dẫn file PDF của sách này.</div>`;
+                }
+            }
+        }
+        /*]]>*/
+    </script>
+</main>
+
+</body>
+</html>

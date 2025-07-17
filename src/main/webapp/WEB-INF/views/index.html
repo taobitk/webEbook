@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/_layout :: layout(~{::title}, ~{::main})}">
+<head>
+  <title>Trang chủ - BSEbook</title>
+</head>
+<body>
+
+<main>
+  <!-- Phần Hero Banner giới thiệu -->
+  <div class="p-5 mb-4 bg-dark rounded-3 text-light text-center">
+    <div class="container-fluid py-5">
+      <h1 class="display-5 fw-bold">Khám phá Thư viện Sách</h1>
+      <p class="fs-4 text-white-50">Nơi chia sẻ kiến thức, đăng tải và mua bán những cuốn sách điện tử hay nhất.</p>
+    </div>
+  </div>
+
+  <!-- Hiển thị thông báo (nếu có) -->
+  <div th:if="${message}" class="alert alert-success" role="alert" th:text="${message}"></div>
+
+  <!-- ** THAY ĐỔI Ở ĐÂY: Tạo một vùng chứa cố định cho kết quả ** -->
+  <div id="search-results-container">
+    <!-- Lưới hiển thị sách (Nội dung ban đầu được tải bởi server) -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="book-grid" th:if="${!books.isEmpty()}">
+      <div class="col" th:each="book : ${books}">
+        <div class="card h-100 shadow-sm border-0">
+          <a th:href="@{/books/{id}(id=${book.id})}" class="text-decoration-none">
+            <img th:src="@{/uploads/{fileName}(fileName=${book.coverImageUrl})}" class="card-img-top"
+                 style="height: 300px; object-fit: cover;"
+                 onerror="this.onerror=null;this.src='https://placehold.co/400x600/1e1e1e/e0e0e0?text=No+Image';">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title text-truncate text-white" th:text="${book.title}">Book Title</h5>
+              <p class="card-text text-muted mb-2">bởi <span th:text="${book.author.username}">Author</span></p>
+              <p class="card-text fw-bold text-primary fs-5 mt-auto" th:text="${#numbers.formatCurrency(book.price)}">Price</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thông báo nếu không có sách (Nội dung ban đầu) -->
+    <div class="text-center p-5" id="no-books-message" th:if="${books.isEmpty()}">
+      <p class="lead text-muted">Chưa có cuốn sách nào được đăng tải.</p>
+    </div>
+  </div>
+
+
+  <!-- --- SCRIPT CHO AJAX SEARCH --- -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const searchForm = document.getElementById('search-form');
+      const searchInput = document.getElementById('search-input');
+      // ** THAY ĐỔI Ở ĐÂY: JavaScript sẽ làm việc với vùng chứa cố định **
+      const resultsContainer = document.getElementById('search-results-container');
+
+      // Hàm để render danh sách sách
+      function renderBooks(books) {
+        // Luôn xóa nội dung cũ của vùng chứa
+        resultsContainer.innerHTML = '';
+
+        if (!books || books.length === 0) {
+          // Nếu không có sách, chèn thông báo vào vùng chứa
+          const noBooksHtml = `
+                        <div class="text-center p-5">
+                            <p class="lead text-muted">Không tìm thấy cuốn sách nào phù hợp.</p>
+                        </div>
+                    `;
+          resultsContainer.innerHTML = noBooksHtml;
+        } else {
+          // Nếu có sách, tạo lưới và chèn vào vùng chứa
+          let bookGridHtml = '<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">';
+          books.forEach(book => {
+            const price = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.price);
+            bookGridHtml += `
+                            <div class="col">
+                                <div class="card h-100 shadow-sm border-0">
+                                    <a href="/books/${book.id}" class="text-decoration-none">
+                                        <img src="/uploads/${book.coverImageUrl}" class="card-img-top"
+                                             style="height: 300px; object-fit: cover;"
+                                             onerror="this.onerror=null;this.src='https://placehold.co/400x600/1e1e1e/e0e0e0?text=No+Image';">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title text-truncate text-white">${book.title}</h5>
+                                            <p class="card-text text-muted mb-2">bởi <span>${book.authorName}</span></p>
+                                            <p class="card-text fw-bold text-primary fs-5 mt-auto">${price}</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+          });
+          bookGridHtml += '</div>';
+          resultsContainer.innerHTML = bookGridHtml;
+        }
+      }
+
+      // Xử lý sự kiện tìm kiếm
+      searchForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const query = searchInput.value;
+
+        // Hiển thị spinner loading
+        resultsContainer.innerHTML = '<div class="col-12 text-center text-light mt-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+        fetch(`/api/books/search?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                  renderBooks(data);
+                })
+                .catch(error => {
+                  console.error('Lỗi khi tìm kiếm:', error);
+                  resultsContainer.innerHTML = '<div class="alert alert-danger">Có lỗi xảy ra khi tìm kiếm.</div>';
+                });
+      });
+    });
+  </script>
+</main>
+
+</body>
+</html>

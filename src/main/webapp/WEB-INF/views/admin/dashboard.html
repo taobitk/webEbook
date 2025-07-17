@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng điều khiển Admin</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --admin-bg: #121212;
+            --sidebar-bg: #000000;
+            --card-bg: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #adb5bd;
+            --border-color: #343a40;
+            --hover-bg: #343a40;
+            --active-color: #0d6efd;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: var(--admin-bg);
+            color: var(--text-primary);
+        }
+
+        /* --- Sidebar (Giữ nguyên từ book-list.html) --- */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .sidebar-nav {
+            padding: 15px 0;
+            flex-grow: 1;
+        }
+
+        .sidebar .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 25px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: var(--hover-bg);
+            color: #fff;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: var(--hover-bg);
+            color: #fff;
+            border-left-color: var(--active-color);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 40px;
+        }
+
+        /* --- CSS cho các thẻ thống kê trên Dashboard --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--active-color);
+        }
+        .stat-card .icon {
+            font-size: 3rem;
+            color: var(--border-color);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <a th:href="@{/admin/dashboard}"><i class="bi bi-shield-shaded"></i> Admin Panel</a>
+    </div>
+
+    <ul class="nav flex-column sidebar-nav">
+        <li class="nav-item">
+            <a class="nav-link active" th:href="@{/admin/dashboard}"><i class="bi bi-grid-1x2-fill"></i> Tổng quan</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/users}"><i class="bi bi-people-fill"></i> Quản lý người dùng</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/books}"><i class="bi bi-book-fill"></i> Quản lý sách</a>
+        </li>
+    </ul>
+
+    <div class="sidebar-footer">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/home}"><i class="bi bi-house-door-fill"></i> Quay về trang chủ</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="javascript: document.getElementById('logout-form-admin').submit();">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </a>
+                <form id="logout-form-admin" th:action="@{/logout}" method="post" style="display: none;"></form>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="main-content">
+    <main>
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom border-secondary">
+            <h1 class="h2">Bảng điều khiển</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <span class="text-secondary">Hôm nay: <span th:text="${#dates.format(#dates.createNow(), 'dd-MM-yyyy')}"></span></span>
+            </div>
+        </div>
+
+        <p class="lead">Chào mừng trở lại, <strong sec:authentication="principal.username" class="text-white">Admin</strong>!</p>
+
+        <div class="stats-grid mt-4">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3>Tổng số người dùng</h3>
+                        <p class="number mb-0" th:text="${totalUsers}">0</p>
+                    </div>
+                    <i class="bi bi-people-fill icon"></i>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3>Tổng số sách</h3>
+                        <p class="number mb-0" th:text="${totalBooks}">0</p>
+                    </div>
+                    <i class="bi bi-collection-fill icon"></i>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3>Doanh thu (tháng)</h3>
+                        <p class="number mb-0">N/A</p>
+                    </div>
+                    <i class="bi bi-cash-stack icon"></i>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

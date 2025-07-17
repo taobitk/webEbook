@@ -1,0 +1,67 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group 'yaa'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    junitVersion = '5.10.2'
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    compileOnly('javax.servlet:javax.servlet-api:4.0.1')
+    // --- Spring Core & MVC ---
+    implementation 'org.springframework:spring-core:5.3.23'
+    implementation 'org.springframework:spring-context:5.3.23'
+    implementation 'org.springframework:spring-beans:5.3.23'
+    implementation 'org.springframework:spring-web:5.3.23'
+    implementation 'org.springframework:spring-webmvc:5.3.23'
+
+    // --- Spring Security ---
+    implementation 'org.springframework.security:spring-security-web:5.7.3'
+    implementation 'org.springframework.security:spring-security-config:5.7.3'
+    implementation 'org.springframework.security:spring-security-taglibs:5.7.3'
+
+    // --- Spring ORM & JPA (Hibernate) ---
+    implementation 'org.springframework:spring-orm:5.3.23'
+    implementation 'org.hibernate:hibernate-core:5.6.15.Final'
+    implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
+    implementation 'org.springframework.data:spring-data-jpa:2.7.2'
+
+    // --- THÊM VÀO ĐÂY: Thư viện cho Validation ---
+    implementation 'org.hibernate:hibernate-validator:6.2.5.Final'
+
+    // --- Xử lý JSON (Quan trọng cho AJAX sau này) ---
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+
+    // --- Cơ sở dữ liệu ---
+    runtimeOnly 'mysql:mysql-connector-java:8.0.33'
+
+    // --- Servlet API ---
+    providedCompile 'javax.servlet:javax.servlet-api:4.0.1'
+
+    // --- View Layer (Thymeleaf) ---
+    implementation 'org.thymeleaf:thymeleaf-spring5:3.1.2.RELEASE'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5:3.1.2.RELEASE'
+
+    // --- Hỗ trợ upload file ---
+    implementation 'commons-fileupload:commons-fileupload:1.5'
+    implementation 'commons-io:commons-io:2.11.0'
+}
+
+test {
+    useJUnitPlatform()
+}
